@@ -17,17 +17,16 @@ jobs:
         run: |
           mkdir -p etc
           
-          # ১. টার্মাক্সের নাম পুরোপুরি মুছে AutoKaaj ওয়েলকাম মেসেজ দেওয়া
+          # ওয়েলকাম মেসেজ
           echo -e "\e[1;36m======================================\n      WELCOME TO AUTOKAAJ AI TERMINAL      \n======================================\e[0m\n\n\e[1;33m► 1-Click AI Agents: Use the custom buttons below!\n► Subscribe: AutoKaaj YouTube Channel\e[0m\n" > etc/motd
           
-          # ২. অরিজিনাল bashrc বের করে তাতে কাস্টম বোতামের সেটিং ঢোকানো
           unzip -p app/src/main/cpp/bootstrap-aarch64.zip etc/bash.bashrc > etc/bash.bashrc
           cat << 'EOF_BASH' >> etc/bash.bashrc
 
-          # AutoKaaj প্রম্পট
+          # প্রম্পট
           PS1='\[\e[1;32m\]AutoKaaj\[\e[0m\] \[\e[1;34m\]\w\[\e[0m\] \$ '
 
-          # প্রথমবার অ্যাপ ওপেন করলে স্বয়ংক্রিয়ভাবে কাস্টম বোতাম তৈরি হবে
+          # কাস্টম বোতাম সেটআপ
           if [ ! -f ~/.termux/termux.properties ]; then
               mkdir -p ~/.termux
               cat << 'EOF_PROP' > ~/.termux/termux.properties
@@ -53,14 +52,23 @@ jobs:
           fi
           EOF_BASH
 
-          # ৩. পরিবর্তনগুলো বুটস্ট্র্যাপ জিপের ভেতরে সেভ করা
           for z in app/src/main/cpp/bootstrap-*.zip; do 
             zip -u "$z" etc/motd etc/bash.bashrc
           done
       - name: Build with Gradle
         run: ./gradlew assembleDebug
-      - name: Upload APK
+      - name: Rename All APK Files to AutoKaaj
+        run: |
+          cd app/build/outputs/apk/debug/
+          for file in *termux*; do
+            if [ -f "$file" ]; then
+              # ফাইলের নাম থেকে "termux-app_apt-android-7" বা "termux" মুছে AutoKaaj বসাবে
+              new_name=$(echo "$file" | sed 's/termux-app_apt-android-7/AutoKaaj/g' | sed 's/termux/AutoKaaj/g')
+              mv "$file" "$new_name"
+            fi
+          done
+      - name: Upload AutoKaaj APKs
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
+          name: AutoKaaj-Apps
           path: app/build/outputs/apk/debug/
