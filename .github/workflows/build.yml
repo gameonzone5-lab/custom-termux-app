@@ -11,6 +11,8 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Download Bootstraps
+        run: ./gradlew downloadBootstraps
       - name: Build with Gradle
         run: ./gradlew assembleRelease
       - name: Upload APK
@@ -18,4 +20,3 @@ jobs:
         with:
           name: app-release
           path: app/build/outputs/apk/release/
-
