@@ -13,39 +13,49 @@ jobs:
           distribution: 'temurin'
       - name: Download Bootstraps
         run: ./gradlew downloadBootstraps
-      - name: Inject AutoKaaj AI Features
+      - name: Inject AutoKaaj Custom Buttons and Branding
         run: |
-          mkdir -p etc usr/bin
+          mkdir -p usr/etc usr/bin
           
-          # ১. MOTD এবং প্রম্পট ঠিক রাখা
-          echo -e "\e[1;36m======================================\n      WELCOME TO AUTOKAAJ TERMINAL      \n======================================\e[0m\n\n\e[1;33m► Type 'autokaaj-ai' to install AI Agents\n► Subscribe: AutoKaaj YouTube Channel\e[0m\n" > etc/motd
-          unzip -p app/src/main/cpp/bootstrap-aarch64.zip etc/bash.bashrc > etc/bash.bashrc
-          echo "PS1='\[\e[1;32m\]AutoKaaj\[\e[0m\] \[\e[1;34m\]\w\[\e[0m\] \$ '" >> etc/bash.bashrc
+          # ১. টার্মাক্সের নাম পুরোপুরি মুছে AutoKaaj ওয়েলকাম মেসেজ দেওয়া
+          echo -e "\e[1;36m======================================\n      WELCOME TO AUTOKAAJ AI TERMINAL      \n======================================\e[0m\n\n\e[1;33m► 1-Click AI Agents: Use the custom buttons below!\n► Subscribe: AutoKaaj YouTube Channel\e[0m\n" > usr/etc/motd
           
-          # ২. AutoKaaj AI অটো-ইন্সটলার তৈরি করা
-          cat << 'EOF_SCRIPT' > usr/bin/autokaaj-ai
-          #!/data/data/com.termux/files/usr/bin/bash
-          echo -e "\e[1;32mStarting AutoKaaj AI Auto-Setup...\e[0m"
-          echo -e "\e[1;33m1. Installing Python, Git & Dependencies...\e[0m"
-          apt update && apt install python git wget curl proot-distro -y
-          
-          echo -e "\e[1;33m2. Preparing Environment for OpenManus & OpenClaw...\e[0m"
-          pip install --upgrade pip
-          
-          echo -e "\e[1;33m3. Setting up Local Linux for Ollama...\e[0m"
-          # (ভবিষ্যতে আপনি এখানে ওলামা এবং হারমেসের ফুল কমান্ড বসাতে পারবেন)
-          
-          echo -e "\e[1;36m======================================\e[0m"
-          echo -e "\e[1;32m✔ AI Environment Successfully Prepared!\e[0m"
-          echo -e "\e[1;36m======================================\e[0m"
-          EOF_SCRIPT
-          
-          # স্ক্রিপ্টটিকে রান করার পারমিশন দেওয়া
-          chmod +x usr/bin/autokaaj-ai
-          
-          # ৩. বুটস্ট্র্যাপের ভেতরে সেভ করা
+          # ২. অরিজিনাল bashrc বের করে তাতে কাস্টম বোতামের সেটিং ঢোকানো
+          unzip -p app/src/main/cpp/bootstrap-aarch64.zip usr/etc/bash.bashrc > usr/etc/bash.bashrc
+          cat << 'EOF_BASH' >> usr/etc/bash.bashrc
+
+          # AutoKaaj প্রম্পট
+          PS1='\[\e[1;32m\]AutoKaaj\[\e[0m\] \[\e[1;34m\]\w\[\e[0m\] \$ '
+
+          # প্রথমবার অ্যাপ ওপেন করলে স্বয়ংক্রিয়ভাবে কাস্টম বোতাম তৈরি হবে
+          if [ ! -f ~/.termux/termux.properties ]; then
+              mkdir -p ~/.termux
+              cat << 'EOF_PROP' > ~/.termux/termux.properties
+          extra-keys = [ \
+            [ \
+              {macro: "clear && echo 'Installing OpenManus...' && apt update && apt install python git -y && git clone https://github.com/mannaandpoem/OpenManus.git && cd OpenManus && pip install -r requirements.txt\n", display: "OpenManus"}, \
+              {macro: "clear && echo 'Installing OpenClaw...' && apt update && apt install nodejs -y && npm install -g openclaw\n", display: "OpenClaw"}, \
+              {macro: "clear && echo 'Preparing PicoClaw...' && apt update && apt install python git -y && echo 'PicoClaw Environment Ready!'\n", display: "PicoClaw"} \
+            ], \
+            [ \
+              {macro: "clear && echo 'Setting up Ollama Server...' && apt install proot-distro -y && proot-distro install ubuntu && echo 'Ollama Ready!'\n", display: "Ollama Server"}, \
+              {macro: "clear && echo 'Initializing Hermes Agent...' && echo 'Hermes Environment Ready!'\n", display: "Hermes Agent"}, \
+              {macro: "clear && echo 'Installing Cloud Code...' && apt update && apt install nodejs -y && npm install -g @anthropic-ai/claude-code\n", display: "Cloud Code"} \
+            ], \
+            [ \
+              {macro: "clear && echo 'Starting Codex Environment...'\n", display: "Codex"}, \
+              {macro: "clear && echo 'AutoKaaj AI Workspace Initialized!'\n", display: "AI Workspace"}, \
+              'ESC', 'CTRL', 'ENTER' \
+            ] \
+          ]
+          EOF_PROP
+              termux-reload-settings
+          fi
+          EOF_BASH
+
+          # ৩. পরিবর্তনগুলো বুটস্ট্র্যাপ জিপের ভেতরে সেভ করা
           for z in app/src/main/cpp/bootstrap-*.zip; do 
-            zip -u "$z" etc/motd etc/bash.bashrc usr/bin/autokaaj-ai
+            zip -u "$z" usr/etc/motd usr/etc/bash.bashrc
           done
       - name: Build with Gradle
         run: ./gradlew assembleDebug
