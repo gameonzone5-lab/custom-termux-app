@@ -15,14 +15,14 @@ jobs:
         run: ./gradlew downloadBootstraps
       - name: Inject AutoKaaj Custom Buttons and Branding
         run: |
-          mkdir -p usr/etc usr/bin
+          mkdir -p etc
           
           # ১. টার্মাক্সের নাম পুরোপুরি মুছে AutoKaaj ওয়েলকাম মেসেজ দেওয়া
-          echo -e "\e[1;36m======================================\n      WELCOME TO AUTOKAAJ AI TERMINAL      \n======================================\e[0m\n\n\e[1;33m► 1-Click AI Agents: Use the custom buttons below!\n► Subscribe: AutoKaaj YouTube Channel\e[0m\n" > usr/etc/motd
+          echo -e "\e[1;36m======================================\n      WELCOME TO AUTOKAAJ AI TERMINAL      \n======================================\e[0m\n\n\e[1;33m► 1-Click AI Agents: Use the custom buttons below!\n► Subscribe: AutoKaaj YouTube Channel\e[0m\n" > etc/motd
           
           # ২. অরিজিনাল bashrc বের করে তাতে কাস্টম বোতামের সেটিং ঢোকানো
-          unzip -p app/src/main/cpp/bootstrap-aarch64.zip usr/etc/bash.bashrc > usr/etc/bash.bashrc
-          cat << 'EOF_BASH' >> usr/etc/bash.bashrc
+          unzip -p app/src/main/cpp/bootstrap-aarch64.zip etc/bash.bashrc > etc/bash.bashrc
+          cat << 'EOF_BASH' >> etc/bash.bashrc
 
           # AutoKaaj প্রম্পট
           PS1='\[\e[1;32m\]AutoKaaj\[\e[0m\] \[\e[1;34m\]\w\[\e[0m\] \$ '
@@ -55,7 +55,7 @@ jobs:
 
           # ৩. পরিবর্তনগুলো বুটস্ট্র্যাপ জিপের ভেতরে সেভ করা
           for z in app/src/main/cpp/bootstrap-*.zip; do 
-            zip -u "$z" usr/etc/motd usr/etc/bash.bashrc
+            zip -u "$z" etc/motd etc/bash.bashrc
           done
       - name: Build with Gradle
         run: ./gradlew assembleDebug
