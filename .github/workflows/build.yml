@@ -13,6 +13,13 @@ jobs:
           distribution: 'temurin'
       - name: Download Bootstraps
         run: ./gradlew downloadBootstraps
+
+      - name: Forcefully Change App Display Name to AutoKaaj
+        run: |
+          # পুরো প্রজেক্টের সব strings.xml ফাইলে অ্যাপের নাম জোরপূর্বক পরিবর্তন
+          find . -type f -name "strings.xml" -exec sed -i 's/<string name="app_name".*/<string name="app_name" translatable="false">AutoKaaj<\/string>/g' {} +
+          find . -type f -name "strings.xml" -exec sed -i 's/>Termux</>AutoKaaj</g' {} +
+
       - name: Inject AutoKaaj Custom Buttons and Branding
         run: |
           mkdir -p etc
@@ -62,7 +69,6 @@ jobs:
           cd app/build/outputs/apk/debug/
           for file in *termux*; do
             if [ -f "$file" ]; then
-              # ফাইলের নাম থেকে "termux-app_apt-android-7" বা "termux" মুছে AutoKaaj বসাবে
               new_name=$(echo "$file" | sed 's/termux-app_apt-android-7/AutoKaaj/g' | sed 's/termux/AutoKaaj/g')
               mv "$file" "$new_name"
             fi
