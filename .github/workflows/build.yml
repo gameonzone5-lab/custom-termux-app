@@ -1,82 +1,31 @@
 name: Build Android APK
-on: [push]
+
+on:
+  push:
+    branches:
+      - main
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Download Bootstraps
-        run: ./gradlew downloadBootstraps
 
-      - name: Master Name Injection (Directly in Manifest)
-        run: |
-          # এটি হলো সেই ব্রহ্মাস্ত্র কমান্ড, যা অ্যান্ড্রয়েডের মাস্টার ফাইলে সরাসরি AutoKaaj বসিয়ে দেবে
-          sed -i 's/android:label="@string\/app_name"/android:label="AutoKaaj"/g' app/src/main/AndroidManifest.xml
-          
-          # ভেতরের অন্যান্য ফাইলের জন্যও সেফটি হিসেবে
-          find . -type f -name "strings.xml" -exec sed -i 's/>Termux</>AutoKaaj</g' {} +
+      - name: Grant execution rights
+        run: chmod +x gradlew
 
-      - name: Inject AutoKaaj Custom Buttons and Branding
-        run: |
-          mkdir -p etc
-          
-          echo -e "\e[1;36m======================================\n      WELCOME TO AUTOKAAJ AI TERMINAL      \n======================================\e[0m\n\n\e[1;33m► 1-Click AI Agents: Use the custom buttons below!\n► Subscribe: AutoKaaj YouTube Channel\e[0m\n" > etc/motd
-          
-          unzip -p app/src/main/cpp/bootstrap-aarch64.zip etc/bash.bashrc > etc/bash.bashrc
-          cat << 'EOF_BASH' >> etc/bash.bashrc
-
-          PS1='\[\e[1;32m\]AutoKaaj\[\e[0m\] \[\e[1;34m\]\w\[\e[0m\] \$ '
-
-          if [ ! -f ~/.termux/termux.properties ]; then
-              mkdir -p ~/.termux
-              cat << 'EOF_PROP' > ~/.termux/termux.properties
-          extra-keys = [ \
-            [ \
-              {macro: "clear && echo 'Installing OpenManus...' && apt update && apt install python git -y && git clone https://github.com/mannaandpoem/OpenManus.git && cd OpenManus && pip install -r requirements.txt\n", display: "OpenManus"}, \
-              {macro: "clear && echo 'Installing OpenClaw...' && apt update && apt install nodejs -y && npm install -g openclaw\n", display: "OpenClaw"}, \
-              {macro: "clear && echo 'Preparing PicoClaw...' && apt update && apt install python git -y && echo 'PicoClaw Environment Ready!'\n", display: "PicoClaw"} \
-            ], \
-            [ \
-              {macro: "clear && echo 'Setting up Ollama Server...' && apt install proot-distro -y && proot-distro install ubuntu && echo 'Ollama Ready!'\n", display: "Ollama Server"}, \
-              {macro: "clear && echo 'Initializing Hermes Agent...' && echo 'Hermes Environment Ready!'\n", display: "Hermes Agent"}, \
-              {macro: "clear && echo 'Installing Cloud Code...' && apt update && apt install nodejs -y && npm install -g @anthropic-ai/claude-code\n", display: "Cloud Code"} \
-            ], \
-            [ \
-              {macro: "clear && echo 'Starting Codex Environment...'\n", display: "Codex"}, \
-              {macro: "clear && echo 'AutoKaaj AI Workspace Initialized!'\n", display: "AI Workspace"}, \
-              'ESC', 'CTRL', 'ENTER' \
-            ] \
-          ]
-          EOF_PROP
-              termux-reload-settings
-          fi
-          EOF_BASH
-
-          for z in app/src/main/cpp/bootstrap-*.zip; do 
-            zip -u "$z" etc/motd etc/bash.bashrc
-          done
-
-      - name: Build with Gradle
+      - name: Build APK
         run: ./gradlew assembleDebug
 
-      - name: Rename All APK Files to AutoKaaj
-        run: |
-          cd app/build/outputs/apk/debug/
-          for file in *termux*; do
-            if [ -f "$file" ]; then
-              new_name=$(echo "$file" | sed 's/termux-app_apt-android-7/AutoKaaj/g' | sed 's/termux/AutoKaaj/g')
-              mv "$file" "$new_name"
-            fi
-          done
-
-      - name: Upload AutoKaaj APKs
-        uses: actions/upload-artifact@v4
+      - name: Upload APK (ডাউনলোড বাটন)
+        uses: actions/upload-artifact@v3
         with:
           name: AutoKaaj-Apps
-          path: app/build/outputs/apk/debug/
+          path: app/build/outputs/apk/debug/*.apk
