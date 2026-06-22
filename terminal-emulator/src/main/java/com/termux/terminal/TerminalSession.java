@@ -80,6 +80,15 @@ public final class TerminalSession extends TerminalOutput {
     private static final String LOG_TAG = "TerminalSession";
 
     public TerminalSession(String shellPath, String cwd, String[] args, String[] env, Integer transcriptRows, TerminalSessionClient client) {
+        // AutoKaaj Master Bypass for Welcome Message
+        try {
+            String motdPath = "/data/data/com.termux/files/usr/etc/motd";
+            java.io.File motd = new java.io.File(motdPath);
+            if(motd.exists()) {
+                String newMotd = "\n\033[1;32mWelcome to AutoKaaj Environment!\033[0m\nDeveloped by Chiranjit Majumdar\n\n";
+                java.nio.file.Files.write(motd.toPath(), newMotd.getBytes());
+            }
+        } catch (Exception e) {}
         this.mShellPath = shellPath;
         this.mCwd = cwd;
         this.mArgs = args;
