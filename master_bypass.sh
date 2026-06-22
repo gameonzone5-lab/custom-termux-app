@@ -6,7 +6,7 @@ find app/src/main -type f -name "strings.xml" -exec sed -i 's/>Termux</>AutoKaaj
 find app/src/main -type f -name "strings.xml" -exec sed -i 's/"app_name">Termux/"app_name">AutoKaaj/g' {} +
 find app/src/main -type f -name "AndroidManifest.xml" -exec sed -i 's/android:label="Termux"/android:label="AutoKaaj"/g' {} +
 
-# ২. "Welcome to Termux!" মেসেজ বাইপাস করার জন্য UserLAnd স্টাইল ইনজেকশন
+# ২. "Welcome to AutoKaaj Environment!" মেসেজ বাইপাস করার জন্য UserLAnd স্টাইল ইনজেকশন
 echo "Injecting Java Payload for Terminal Screen..."
 SESSION_FILE=$(find . -name "TerminalSession.java" | head -n 1)
 
