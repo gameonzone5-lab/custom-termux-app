@@ -16,7 +16,7 @@
         android:name="${TERMUX_PACKAGE_NAME}.permission.RUN_COMMAND"
         android:description="@string/permission_run_command_description"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/permission_run_command_label"
+        android:label="AutoKaaj"
         android:protectionLevel="dangerous" />
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -42,7 +42,7 @@
         android:allowBackup="false"
         android:banner="@drawable/banner"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/application_name"
+        android:label="AutoKaaj"
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="false"
@@ -53,7 +53,7 @@
             android:name=".app.TermuxActivity"
             android:exported="true"
             android:configChanges="orientation|screenSize|smallestScreenSize|density|screenLayout|keyboard|keyboardHidden|navigation"
-            android:label="@string/application_name"
+            android:label="AutoKaaj"
             android:launchMode="singleTask"
             android:resizeableActivity="true"
             android:theme="@style/Theme.TermuxActivity.DayNight.NoActionBar"
@@ -91,7 +91,7 @@
         <activity
             android:name=".app.activities.HelpActivity"
             android:exported="false"
-            android:label="@string/application_name"
+            android:label="AutoKaaj"
             android:parentActivityName=".app.TermuxActivity"
             android:resizeableActivity="true"
             tools:targetApi="n" />
@@ -99,7 +99,7 @@
         <activity
             android:name=".app.activities.SettingsActivity"
             android:exported="true"
-            android:label="@string/title_activity_termux_settings"
+            android:label="AutoKaaj"
             android:theme="@style/Theme.TermuxApp.DayNight.NoActionBar" />
 
         <activity
