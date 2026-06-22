@@ -24,7 +24,11 @@ jobs:
       - name: Build APK
         run: ./gradlew assembleDebug
 
-      - name: Upload APK (ডাউনলোড বাটন)
+      - name: Remove Termux Name from APK Files
+        run: |
+          find app/build/outputs/apk/debug/ -name "*.apk" -exec bash -c 'mv "$0" "${0/termux-app/AutoKaaj-App}"' {} \;
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: AutoKaaj-Apps
