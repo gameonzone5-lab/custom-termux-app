@@ -22,30 +22,28 @@ jobs:
           
       - name: Deep Bootstrap Hack (The Ultimate Filter)
         run: |
-          # অ্যাপের ভেতরের সমস্ত লুকানো জিপ ফাইল খুঁজে বের করা হচ্ছে
           find AutoKaaj_Hack/assets -type f -name "bootstrap-*.zip" | while read zipfile; do
               echo "Hacking core bootstrap: $zipfile"
               dir=$(dirname "$zipfile")
               base=$(basename "$zipfile")
               
-              # জিপ ফাইল আনপ্যাক করা
               mkdir -p "$dir/temp_boot"
               unzip -q "$zipfile" -d "$dir/temp_boot"
               
-              # Termux-এর মেসেজ মুছে AutoKaaj-এর মেসেজ ইনজেক্ট করা
               mkdir -p "$dir/temp_boot/etc"
-              cat << 'MOTD' > "$dir/temp_boot/etc/motd"
               
-m=================================================m
-m           AutoKaaj AI Workstation               m
-m           Developed by: Chiranjit Majumdar      m
-m=================================================m
-m        System: Online | AI Engine: Ready        m
-m=================================================m
-
-MOTD
+              # YAML সেফ পদ্ধতিতে কালারফুল ওয়েলকাম মেসেজ (MOTD) তৈরি
+              echo -e "\e[1;32m=================================================\e[0m" > "$dir/temp_boot/etc/motd"
+              echo -e "\e[1;36m           AutoKaaj AI Workstation               \e[0m" >> "$dir/temp_boot/etc/motd"
+              echo -e "\e[1;33m           Developed by: Chiranjit Majumdar      \e[0m" >> "$dir/temp_boot/etc/motd"
+              echo -e "\e[1;32m=================================================\e[0m" >> "$dir/temp_boot/etc/motd"
+              echo -e "\e[1;37m        System: Online | AI Engine: Ready        \e[0m" >> "$dir/temp_boot/etc/motd"
+              echo -e "\e[1;32m=================================================\e[0m" >> "$dir/temp_boot/etc/motd"
+              echo "" >> "$dir/temp_boot/etc/motd"
               
-              # পুরোনো জিপ মুছে হ্যাক করা নতুন জিপ তৈরি করা
+              # টার্মিনালের প্রম্পট ডিফল্টভাবে AutoKaaj করার কোড ইনজেক্ট
+              echo "PS1='\[\e[1;32m\]AutoKaaj\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\] $ '" >> "$dir/temp_boot/etc/bash.bashrc"
+              
               rm "$zipfile"
               cd "$dir/temp_boot"
               zip -qr "../$base" .
