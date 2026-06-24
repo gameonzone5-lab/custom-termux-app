@@ -7,7 +7,7 @@ jobs:
       - name: Install Hacking Tools
         run: |
           sudo apt update
-          sudo apt install -y wget zipalign apksigner
+          sudo apt install -y wget zipalign apksigner zip unzip
           wget https://github.com/iBotPeaches/Apktool/releases/download/v2.9.3/apktool_2.9.3.jar -O apktool.jar
           wget https://f-droid.org/repo/com.termux_118.apk -O termux.apk
           
@@ -16,11 +16,42 @@ jobs:
         
       - name: Safe Inject AutoKaaj Branding
         run: |
-          # একদম নিখুঁতভাবে শুধু ডিসপ্লের লেখাগুলো বদলানো হচ্ছে, কোড ভাঙবে না
           find AutoKaaj_Hack/res -type f -name "strings.xml" -exec sed -i 's/>Termux/>AutoKaaj/g' {} +
           find AutoKaaj_Hack/res -type f -name "strings.xml" -exec sed -i 's/>termux/>autoKaaj/g' {} +
           find AutoKaaj_Hack/res -type f -name "strings.xml" -exec sed -i 's/Termux was unable/AutoKaaj was unable/g' {} +
-          find AutoKaaj_Hack/res -type f -name "strings.xml" -exec sed -i 's/bootstrap packages/AutoKaaj packages/g' {} +
+          
+      - name: Deep Bootstrap Hack (The Ultimate Filter)
+        run: |
+          # অ্যাপের ভেতরের সমস্ত লুকানো জিপ ফাইল খুঁজে বের করা হচ্ছে
+          find AutoKaaj_Hack/assets -type f -name "bootstrap-*.zip" | while read zipfile; do
+              echo "Hacking core bootstrap: $zipfile"
+              dir=$(dirname "$zipfile")
+              base=$(basename "$zipfile")
+              
+              # জিপ ফাইল আনপ্যাক করা
+              mkdir -p "$dir/temp_boot"
+              unzip -q "$zipfile" -d "$dir/temp_boot"
+              
+              # Termux-এর মেসেজ মুছে AutoKaaj-এর মেসেজ ইনজেক্ট করা
+              mkdir -p "$dir/temp_boot/etc"
+              cat << 'MOTD' > "$dir/temp_boot/etc/motd"
+              
+m=================================================m
+m           AutoKaaj AI Workstation               m
+m           Developed by: Chiranjit Majumdar      m
+m=================================================m
+m        System: Online | AI Engine: Ready        m
+m=================================================m
+
+MOTD
+              
+              # পুরোনো জিপ মুছে হ্যাক করা নতুন জিপ তৈরি করা
+              rm "$zipfile"
+              cd "$dir/temp_boot"
+              zip -qr "../$base" .
+              cd - > /dev/null
+              rm -rf "$dir/temp_boot"
+          done
           
       - name: Repack App
         run: java -jar apktool.jar b AutoKaaj_Hack -o AutoKaaj_Unsigned.apk
