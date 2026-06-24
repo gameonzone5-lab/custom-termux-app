@@ -20,7 +20,7 @@ jobs:
           find AutoKaaj_Hack/res -type f -name "strings.xml" -exec sed -i 's/>termux/>autoKaaj/g' {} +
           find AutoKaaj_Hack/res -type f -name "strings.xml" -exec sed -i 's/Termux was unable/AutoKaaj was unable/g' {} +
           
-      - name: Deep Bootstrap Hack (The Ultimate Filter)
+      - name: Deep Bootstrap Hack (The Ultimate Bypass)
         run: |
           find AutoKaaj_Hack/assets -type f -name "bootstrap-*.zip" | while read zipfile; do
               echo "Hacking core bootstrap: $zipfile"
@@ -30,19 +30,20 @@ jobs:
               mkdir -p "$dir/temp_boot"
               unzip -q "$zipfile" -d "$dir/temp_boot"
               
-              mkdir -p "$dir/temp_boot/etc"
+              # এবার আসল টার্গেট: usr/etc ফোল্ডার
+              mkdir -p "$dir/temp_boot/usr/etc"
               
-              # YAML সেফ পদ্ধতিতে কালারফুল ওয়েলকাম মেসেজ (MOTD) তৈরি
-              echo -e "\e[1;32m=================================================\e[0m" > "$dir/temp_boot/etc/motd"
-              echo -e "\e[1;36m           AutoKaaj AI Workstation               \e[0m" >> "$dir/temp_boot/etc/motd"
-              echo -e "\e[1;33m           Developed by: Chiranjit Majumdar      \e[0m" >> "$dir/temp_boot/etc/motd"
-              echo -e "\e[1;32m=================================================\e[0m" >> "$dir/temp_boot/etc/motd"
-              echo -e "\e[1;37m        System: Online | AI Engine: Ready        \e[0m" >> "$dir/temp_boot/etc/motd"
-              echo -e "\e[1;32m=================================================\e[0m" >> "$dir/temp_boot/etc/motd"
-              echo "" >> "$dir/temp_boot/etc/motd"
+              # টার্মাক্সের অরিজিনাল MOTD মুছে AutoKaaj বসানো হচ্ছে
+              echo -e "\e[1;32m=================================================\e[0m" > "$dir/temp_boot/usr/etc/motd"
+              echo -e "\e[1;36m           AutoKaaj AI Workstation               \e[0m" >> "$dir/temp_boot/usr/etc/motd"
+              echo -e "\e[1;33m           Developed by: Chiranjit Majumdar      \e[0m" >> "$dir/temp_boot/usr/etc/motd"
+              echo -e "\e[1;32m=================================================\e[0m" >> "$dir/temp_boot/usr/etc/motd"
+              echo -e "\e[1;37m        System: Online | AI Engine: Ready        \e[0m" >> "$dir/temp_boot/usr/etc/motd"
+              echo -e "\e[1;32m=================================================\e[0m" >> "$dir/temp_boot/usr/etc/motd"
+              echo "" >> "$dir/temp_boot/usr/etc/motd"
               
-              # টার্মিনালের প্রম্পট ডিফল্টভাবে AutoKaaj করার কোড ইনজেক্ট
-              echo "PS1='\[\e[1;32m\]AutoKaaj\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\] $ '" >> "$dir/temp_boot/etc/bash.bashrc"
+              # Bash প্রম্পটও ডাইরেক্ট usr/etc/bash.bashrc-তে হ্যাক করা হচ্ছে
+              echo "PS1='\[\e[1;32m\]AutoKaaj\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\] $ '" >> "$dir/temp_boot/usr/etc/bash.bashrc"
               
               rm "$zipfile"
               cd "$dir/temp_boot"
