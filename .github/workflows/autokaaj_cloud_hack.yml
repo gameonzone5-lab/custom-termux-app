@@ -14,10 +14,13 @@ jobs:
       - name: Unpack Original App
         run: java -jar apktool.jar d termux.apk -o AutoKaaj_Hack -f
         
-      - name: Inject AutoKaaj Branding Deeply
+      - name: Safe Inject AutoKaaj Branding
         run: |
-          find AutoKaaj_Hack/res -type f -name "strings.xml" -exec sed -i 's/Termux/AutoKaaj/g' {} +
-          find AutoKaaj_Hack/res -type f -name "strings.xml" -exec sed -i 's/termux/AutoKaaj/g' {} +
+          # একদম নিখুঁতভাবে শুধু ডিসপ্লের লেখাগুলো বদলানো হচ্ছে, কোড ভাঙবে না
+          find AutoKaaj_Hack/res -type f -name "strings.xml" -exec sed -i 's/>Termux/>AutoKaaj/g' {} +
+          find AutoKaaj_Hack/res -type f -name "strings.xml" -exec sed -i 's/>termux/>autoKaaj/g' {} +
+          find AutoKaaj_Hack/res -type f -name "strings.xml" -exec sed -i 's/Termux was unable/AutoKaaj was unable/g' {} +
+          find AutoKaaj_Hack/res -type f -name "strings.xml" -exec sed -i 's/bootstrap packages/AutoKaaj packages/g' {} +
           
       - name: Repack App
         run: java -jar apktool.jar b AutoKaaj_Hack -o AutoKaaj_Unsigned.apk
