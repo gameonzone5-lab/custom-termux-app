@@ -1,29 +1,30 @@
 #!/bin/bash
+# AutoKaaj AI Station: Node 24+ Master Setup
+# Developed by: Chiranjit Majumdar
 
-# ১. ইন্সটল স্ক্রিনে এবং অ্যাপের ভেতরে টার্মাক্স নাম মুছে AutoKaaj করা
-echo "Patching App Install Name..."
-find app/src/main -type f -name "strings.xml" -exec sed -i 's/>Termux</>AutoKaaj</g' {} +
-find app/src/main -type f -name "strings.xml" -exec sed -i 's/"app_name">Termux/"app_name">AutoKaaj/g' {} +
-find app/src/main -type f -name "AndroidManifest.xml" -exec sed -i 's/android:label="Termux"/android:label="AutoKaaj"/g' {} +
+clear
+echo "================================================="
+echo "   AutoKaaj AI Station - Initializing Setup...   "
+echo "================================================="
 
-# ২. "Welcome to AutoKaaj Environment!" মেসেজ বাইপাস করার জন্য UserLAnd স্টাইল ইনজেকশন
-echo "Injecting Java Payload for Terminal Screen..."
-SESSION_FILE=$(find . -name "TerminalSession.java" | head -n 1)
+# ১. সিস্টেম আপডেট ও প্যাকেজ সেটআপ
+pkg update -y && pkg upgrade -y
+pkg install -y git python-3.11 wget unzip cmake make nodejs-lts
 
-# ইনজেকশন পেলোড তৈরি করা হচ্ছে
-cat << 'INJECT' > payload.txt
-        // AutoKaaj Master Bypass for Welcome Message
-        try {
-            String motdPath = "/data/data/com.termux/files/usr/etc/motd";
-            java.io.File motd = new java.io.File(motdPath);
-            if(motd.exists()) {
-                String newMotd = "\n\033[1;32mWelcome to AutoKaaj Environment!\033[0m\nDeveloped by Chiranjit Majumdar\n\n";
-                java.nio.file.Files.write(motd.toPath(), newMotd.getBytes());
-            }
-        } catch (Exception e) {}
-INJECT
+# ২. Node.js ভার্সন ২৪+ এবং প্যাকেজ
+npm install -g npm@latest
+npm install -g n8n pm2
 
-# TerminalSession চালু হওয়ার ঠিক শুরুতেই পেলোডটি বসিয়ে দেওয়া হচ্ছে
-sed -i '/public TerminalSession(/r payload.txt' "$SESSION_FILE"
+# ৩. এআই ইঞ্জিন (Ollama)
+if ! command -v ollama &> /dev/null; then
+    curl -fsSL https://ollama.com/install.sh | sh
+fi
 
-echo "Master Bypass Successfully Applied!"
+# ৪. ব্যাকগ্রাউন্ড অটোমেশন
+pm2 start n8n --name "AutoKaaj-AI" -- start
+pm2 save
+
+# ৫. টার্মিনাল ব্র্যান্ডিং
+rm -f $PREFIX/etc/motd
+echo -e "\e[1;32m=================================================\e[0m\n\e[1;36m           AutoKaaj AI Workstation               \e[0m\n\e[1;33m           Developed by: Chiranjit Majumdar      \e[0m\n\e[1;32m=================================================\e[0m\n\e[1;37m        System: Online | AI Engine: Ready        \e[0m\n\e[1;32m=================================================\e[0m\n" > $PREFIX/etc/motd
+echo "PS1='\[\e[1;32m\]AutoKaaj\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\] $ '" >> ~/.bashrc
