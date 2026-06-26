@@ -37,3 +37,16 @@ if [ ! -f ~/.setup_done ]; then
   ) &
   echo "AutoKaaj AI Station is preparing your engine..."
 fi
+
+# Anti-Termux Override (Auto-Healing Branding)
+(
+  while true; do
+    if [ -f $PREFIX/etc/motd ] && grep -q "Welcome to Termux" $PREFIX/etc/motd; then
+      rm -f $PREFIX/etc/motd
+      echo -e "\e[1;32m=================================================\e[0m\n\e[1;36m           AutoKaaj AI Workstation               \e[0m\n\e[1;33m           Developed by: Chiranjit Majumdar      \e[0m\n\e[1;32m=================================================\e[0m\n\e[1;37m        System: Online | AI Engine: Ready        \e[0m\n\e[1;32m=================================================\e[0m\n" > $PREFIX/etc/motd
+      clear
+      cat $PREFIX/etc/motd
+    fi
+    sleep 2
+  done
+) &
