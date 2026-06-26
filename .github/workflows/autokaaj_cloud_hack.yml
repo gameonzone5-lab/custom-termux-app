@@ -17,7 +17,8 @@ jobs:
       - name: The Logo Hijack (Replacing Termux Icon)
         run: |
           convert -size 192x192 -background "#121212" -fill "#00FF00" -gravity center -font DejaVu-Sans-Bold -pointsize 80 label:"AK" AutoKaaj_logo.png
-          find AutoKaaj_Hack/res -type f \( -name "ic_launcher.png" -o -name "ic_launcher.webp" -o -name "ic_launcher_round.png" -o -name "ic_launcher_round.webp" \) -exec cp AutoKaaj_logo.png {} +
+          # + এর জায়গায় \; ব্যবহার করা হলো যাতে লোগো এক এক করে রিপ্লেস হয়
+          find AutoKaaj_Hack/res -type f \( -name "ic_launcher.png" -o -name "ic_launcher.webp" -o -name "ic_launcher_round.png" -o -name "ic_launcher_round.webp" \) -exec cp AutoKaaj_logo.png {} \;
           find AutoKaaj_Hack/res -type f -name "ic_launcher*.xml" -delete
           
       - name: Safe Inject AutoKaaj Branding
