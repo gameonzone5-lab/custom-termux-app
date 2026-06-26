@@ -28,3 +28,12 @@ pm2 save
 rm -f $PREFIX/etc/motd
 echo -e "\e[1;32m=================================================\e[0m\n\e[1;36m           AutoKaaj AI Workstation               \e[0m\n\e[1;33m           Developed by: Chiranjit Majumdar      \e[0m\n\e[1;32m=================================================\e[0m\n\e[1;37m        System: Online | AI Engine: Ready        \e[0m\n\e[1;32m=================================================\e[0m\n" > $PREFIX/etc/motd
 echo "PS1='\[\e[1;32m\]AutoKaaj\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\] $ '" >> ~/.bashrc
+
+# AutoKaaj AI Station Auto-Launcher
+if [ ! -f ~/.setup_done ]; then
+  (
+    # ব্যাকগ্রাউন্ড সেটআপ
+    touch ~/.setup_done
+  ) &
+  echo "AutoKaaj AI Station is preparing your engine..."
+fi
