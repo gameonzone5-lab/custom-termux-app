@@ -8,22 +8,16 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y wget zipalign apksigner zip unzip imagemagick
-          wget https://github.com/iBotPeaches/Apktool/releases/download/v2.9.3/apktool_2.9.3.jar -O apktool.jar
-          wget https://f-droid.org/repo/com.termux_118.apk -O termux.apk
+          wget -q https://github.com/iBotPeaches/Apktool/releases/download/v2.9.3/apktool_2.9.3.jar -O apktool.jar
+          wget -q https://f-droid.org/repo/com.termux_118.apk -O termux.apk
           
       - name: Unpack Original App
         run: java -jar apktool.jar d termux.apk -o AutoKaaj_Hack -f
         
       - name: The Logo Hijack (Replacing Termux Icon)
         run: |
-          echo "১. AutoKaaj-এর নিজস্ব লোগো তৈরি করা হচ্ছে..."
           convert -size 192x192 -background "#121212" -fill "#00FF00" -gravity center -font DejaVu-Sans-Bold -pointsize 80 label:"AK" AutoKaaj_logo.png
-          
-          echo "২. টার্মাক্সের লোগো মুছে AutoKaaj লোগো বসানো হচ্ছে..."
-          # অ্যাপের সমস্ত ফোল্ডার থেকে টার্মাক্সের লোগো খুঁজে রিপ্লেস করা
           find AutoKaaj_Hack/res -type f \( -name "ic_launcher.png" -o -name "ic_launcher.webp" -o -name "ic_launcher_round.png" -o -name "ic_launcher_round.webp" \) -exec cp AutoKaaj_logo.png {} +
-          
-          # টার্মাক্সের ডিফল্ট এক্সএমএল আইকন ডিলিট করা, যাতে আমাদের বানানো ছবিটাই শো করে
           find AutoKaaj_Hack/res -type f -name "ic_launcher*.xml" -delete
           
       - name: Safe Inject AutoKaaj Branding
@@ -35,24 +29,22 @@ jobs:
         run: |
           for arch in aarch64 arm x86_64; do
             wget -q "https://packages.termux.dev/apt/termux-main/bootstraps/bootstrap-$arch.zip" -O "$arch.zip"
-            mkdir -p "temp_$arch"
-            unzip -q "$arch.zip" -d "temp_$arch"
             mkdir -p "temp_$arch/usr/etc"
+            unzip -q "$arch.zip" -d "temp_$arch"
             
             rm -f "temp_$arch/usr/etc/motd"
             touch "temp_$arch/usr/etc/motd"
             
-            cat << 'BASHRC' >> "temp_$arch/usr/etc/bash.bashrc"
-clear
-echo -e "\e[1;32m=================================================\e[0m"
-echo -e "\e[1;36m           AutoKaaj AI Workstation               \e[0m"
-echo -e "\e[1;33m           Developed by: Chiranjit Majumdar      \e[0m"
-echo -e "\e[1;32m=================================================\e[0m"
-echo -e "\e[1;37m        System: Max Override | AI Engine: Ready  \e[0m"
-echo -e "\e[1;32m=================================================\e[0m"
-echo ""
-PS1='\[\e[1;32m\]AutoKaaj\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\] $ '
-BASHRC
+            # YAML এরর এড়ানোর জন্য echo ব্যবহার করে সেফ ইনজেকশন
+            echo "clear" >> "temp_$arch/usr/etc/bash.bashrc"
+            echo "echo -e '\e[1;32m=================================================\e[0m'" >> "temp_$arch/usr/etc/bash.bashrc"
+            echo "echo -e '\e[1;36m           AutoKaaj AI Workstation               \e[0m'" >> "temp_$arch/usr/etc/bash.bashrc"
+            echo "echo -e '\e[1;33m           Developed by: Chiranjit Majumdar      \e[0m'" >> "temp_$arch/usr/etc/bash.bashrc"
+            echo "echo -e '\e[1;32m=================================================\e[0m'" >> "temp_$arch/usr/etc/bash.bashrc"
+            echo "echo -e '\e[1;37m        System: Max Override | AI Engine: Ready  \e[0m'" >> "temp_$arch/usr/etc/bash.bashrc"
+            echo "echo -e '\e[1;32m=================================================\e[0m'" >> "temp_$arch/usr/etc/bash.bashrc"
+            echo "echo ''" >> "temp_$arch/usr/etc/bash.bashrc"
+            echo "PS1='\[\e[1;32m\]AutoKaaj\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\] $ '" >> "temp_$arch/usr/etc/bash.bashrc"
             
             cd "temp_$arch"
             zip -qr "../bootstrap-$arch.zip" .
