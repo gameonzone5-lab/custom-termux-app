@@ -4,16 +4,28 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Install Hacking Tools
+      - name: Install Hacking Tools & Graphics Engine
         run: |
           sudo apt update
-          sudo apt install -y wget zipalign apksigner zip unzip
+          sudo apt install -y wget zipalign apksigner zip unzip imagemagick
           wget https://github.com/iBotPeaches/Apktool/releases/download/v2.9.3/apktool_2.9.3.jar -O apktool.jar
           wget https://f-droid.org/repo/com.termux_118.apk -O termux.apk
           
       - name: Unpack Original App
         run: java -jar apktool.jar d termux.apk -o AutoKaaj_Hack -f
         
+      - name: The Logo Hijack (Replacing Termux Icon)
+        run: |
+          echo "১. AutoKaaj-এর নিজস্ব লোগো তৈরি করা হচ্ছে..."
+          convert -size 192x192 -background "#121212" -fill "#00FF00" -gravity center -font DejaVu-Sans-Bold -pointsize 80 label:"AK" AutoKaaj_logo.png
+          
+          echo "২. টার্মাক্সের লোগো মুছে AutoKaaj লোগো বসানো হচ্ছে..."
+          # অ্যাপের সমস্ত ফোল্ডার থেকে টার্মাক্সের লোগো খুঁজে রিপ্লেস করা
+          find AutoKaaj_Hack/res -type f \( -name "ic_launcher.png" -o -name "ic_launcher.webp" -o -name "ic_launcher_round.png" -o -name "ic_launcher_round.webp" \) -exec cp AutoKaaj_logo.png {} +
+          
+          # টার্মাক্সের ডিফল্ট এক্সএমএল আইকন ডিলিট করা, যাতে আমাদের বানানো ছবিটাই শো করে
+          find AutoKaaj_Hack/res -type f -name "ic_launcher*.xml" -delete
+          
       - name: Safe Inject AutoKaaj Branding
         run: |
           find AutoKaaj_Hack/res -type f -name "strings.xml" -exec sed -i 's/>Termux/>AutoKaaj/g' {} +
@@ -21,20 +33,15 @@ jobs:
           
       - name: The Max Hack Kill-Switch Injection
         run: |
-          # পৃথিবীর যেকোনো প্রসেসরের (arm64, arm, x86) জন্য বুটস্ট্র্যাপ নামিয়ে হ্যাক করা হচ্ছে
           for arch in aarch64 arm x86_64; do
-            echo "Hacking architecture: $arch"
             wget -q "https://packages.termux.dev/apt/termux-main/bootstraps/bootstrap-$arch.zip" -O "$arch.zip"
-            
             mkdir -p "temp_$arch"
             unzip -q "$arch.zip" -d "temp_$arch"
             mkdir -p "temp_$arch/usr/etc"
             
-            # অরিজিনাল MOTD মুছে ডিলিট করে দেওয়া হচ্ছে
             rm -f "temp_$arch/usr/etc/motd"
             touch "temp_$arch/usr/etc/motd"
             
-            # আসল হ্যাক: bash.bashrc এর ভেতরে কমান্ড পুশ করা (যা স্ক্রিন ক্লিয়ার করে AutoKaaj দেখাবে)
             cat << 'BASHRC' >> "temp_$arch/usr/etc/bash.bashrc"
 clear
 echo -e "\e[1;32m=================================================\e[0m"
@@ -47,11 +54,9 @@ echo ""
 PS1='\[\e[1;32m\]AutoKaaj\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\] $ '
 BASHRC
             
-            # পুনরায় প্যাক করে সোর্স ফাইলে পাঠানো
             cd "temp_$arch"
             zip -qr "../bootstrap-$arch.zip" .
             cd ..
-            
             mkdir -p AutoKaaj_Hack/assets
             mv "bootstrap-$arch.zip" AutoKaaj_Hack/assets/
           done
