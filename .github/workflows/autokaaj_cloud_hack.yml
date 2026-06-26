@@ -17,7 +17,6 @@ jobs:
       - name: The Logo Hijack (Replacing Termux Icon)
         run: |
           convert -size 192x192 -background "#121212" -fill "#00FF00" -gravity center -font DejaVu-Sans-Bold -pointsize 80 label:"AK" AutoKaaj_logo.png
-          # + এর জায়গায় \; ব্যবহার করা হলো যাতে লোগো এক এক করে রিপ্লেস হয়
           find AutoKaaj_Hack/res -type f \( -name "ic_launcher.png" -o -name "ic_launcher.webp" -o -name "ic_launcher_round.png" -o -name "ic_launcher_round.webp" \) -exec cp AutoKaaj_logo.png {} \;
           find AutoKaaj_Hack/res -type f -name "ic_launcher*.xml" -delete
           
@@ -26,24 +25,27 @@ jobs:
           find AutoKaaj_Hack/res -type f -name "strings.xml" -exec sed -i 's/>Termux/>AutoKaaj/g' {} +
           find AutoKaaj_Hack/res -type f -name "strings.xml" -exec sed -i 's/>termux/>autoKaaj/g' {} +
           
-      - name: The Max Hack Kill-Switch Injection (Base64 Encrypted Bypass)
+      - name: The Max Hack Kill-Switch Injection (Offline Local Assets)
         run: |
-          for arch in aarch64 arm x86_64; do
-            wget -q "https://packages.termux.dev/apt/termux-main/bootstraps/bootstrap-$arch.zip" -O "$arch.zip"
-            mkdir -p "temp_$arch/usr/etc"
-            unzip -q "$arch.zip" -d "temp_$arch"
+          # কোনো সার্ভার থেকে না নামিয়ে, অ্যাপের ভেতরের অফলাইন জিপগুলোই হ্যাক করা হচ্ছে
+          find AutoKaaj_Hack/assets -type f -name "bootstrap-*.zip" | while read zipfile; do
+            dir=$(dirname "$zipfile")
+            base=$(basename "$zipfile")
+            mkdir -p "$dir/temp_boot"
+            unzip -q "$zipfile" -d "$dir/temp_boot"
             
-            rm -f "temp_$arch/usr/etc/motd"
-            touch "temp_$arch/usr/etc/motd"
+            mkdir -p "$dir/temp_boot/usr/etc"
+            rm -f "$dir/temp_boot/usr/etc/motd"
+            touch "$dir/temp_boot/usr/etc/motd"
             
-            # গিটহাবের সার্ভারকে ধোঁকা দেওয়ার জন্য Base64 এনক্রিপ্টেড হ্যাক
-            echo "Y2xlYXIKZWNobyAtZSAnXGVbMTszMm09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XGVbMG0nCmVjaG8gLWUgJ1xlWzE7MzZtICAgICAgICAgICBBdXRvS2FhaiBBSSBXb3Jrc3RhdGlvbiAgICAgICAgICAgICAgIFxlWzBtJwplY2hvIC1lICdcZVsxOzMzbSAgICAgICAgICAgRGV2ZWxvcGVkIGJ5OiBDaGlyYW5qaXQgTWFqdW1kYXIgICAgICBcZVswbScKZWNobyAtZSAnXGVbMTszMm09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XGVbMG0nCmVjaG8gLWUgJ1xlWzE7MzdtICAgICAgICBTeXN0ZW06IE1heCBPdmVycmlkZSB8IEFJIEVuZ2luZTogUmVhZHkgIFxlWzBtJwplY2hvIC1lICdcZVsxOzMybT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cZVswbScKZWNobyAnJwpQUzE9J1xbXGVbMTszMm1cXUF1dG9LYWFqXFtcZVswbVxdOlxbXGVbMTszNG1cXVx3XFtcZVswbVxdICQgJwo=" | base64 -d >> "temp_$arch/usr/etc/bash.bashrc"
+            # Base64 এনক্রিপ্টেড টার্মিনাল হ্যাক
+            echo "Y2xlYXIKZWNobyAtZSAnXGVbMTszMm09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XGVbMG0nCmVjaG8gLWUgJ1xlWzE7MzZtICAgICAgICAgICBBdXRvS2FhaiBBSSBXb3Jrc3RhdGlvbiAgICAgICAgICAgICAgIFxlWzBtJwplY2hvIC1lICdcZVsxOzMzbSAgICAgICAgICAgRGV2ZWxvcGVkIGJ5OiBDaGlyYW5qaXQgTWFqdW1kYXIgICAgICBcZVswbScKZWNobyAtZSAnXGVbMTszMm09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XGVbMG0nCmVjaG8gLWUgJ1xlWzE7MzdtICAgICAgICBTeXN0ZW06IE1heCBPdmVycmlkZSB8IEFJIEVuZ2luZTogUmVhZHkgIFxlWzBtJwplY2hvIC1lICdcZVsxOzMybT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cZVswbScKZWNobyAnJwpQUzE9J1xbXGVbMTszMm1cXUF1dG9LYWFqXFtcZVswbVxdOlxbXGVbMTszNG1cXVx3XFtcZVswbVxdICQgJwo=" | base64 -d >> "$dir/temp_boot/usr/etc/bash.bashrc"
             
-            cd "temp_$arch"
-            zip -qr "../bootstrap-$arch.zip" .
-            cd ..
-            mkdir -p AutoKaaj_Hack/assets
-            mv "bootstrap-$arch.zip" AutoKaaj_Hack/assets/
+            rm "$zipfile"
+            cd "$dir/temp_boot"
+            zip -qr "../$base" .
+            cd - > /dev/null
+            rm -rf "$dir/temp_boot"
           done
           
       - name: Repack App
